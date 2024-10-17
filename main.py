@@ -1,3 +1,4 @@
+import sys
 from random import randint
 import pyray as rl
 from fonts import fonts as font_codes
@@ -71,7 +72,7 @@ class Chip8:
         for y in range(32):
             for x in range(64):
                 if self.display[x][y] == 1:
-                    rl.draw_rectangle(x * SCALE, y * SCALE, SCALE, SCALE, pixel_color)
+                    rl.draw_rectangle(x * SCALE, y * SCALE, SCALE, SCALE, PIXEL_COLOR)
                 else:
                     pass
 
@@ -525,39 +526,53 @@ WIDTH = 64 * SCALE
 HEIGHT = 32 * SCALE
 TITLE = "Chip8 Emu"
 FPS = 120
+BG_COLOR = rl.GREEN
+PIXEL_COLOR = rl.BLACK
+THRESHOLD = 1 / FPS
 
-# Init
-rl.init_window(WIDTH, HEIGHT, TITLE)
-rl.set_window_position(20, 60)
-rl.set_target_fps(FPS)
 
-# Chip8 Init
-c = Chip8()
+def get_rom():
+    rom: str = sys.argv[1]
+    if rom.strip() == "":
+        print(return_text_red("No file was given"))
+        sys.exit(1)
+    return rom
 
-# FIXME: Fix keypad.ch8 test not rendering choices prperly?
-# I don't know why
-c.load_rom("pong-1-player.ch8")
-c.init_emu()
 
-bg_color = rl.GREEN
-pixel_color = rl.BLACK
-accumulator = 0
-threshold = 1 / FPS
+def main(rom):
+    # Init
+    rl.init_window(WIDTH, HEIGHT, TITLE)
+    rl.set_window_position(20, 60)
+    rl.set_target_fps(FPS)
 
-while not rl.window_should_close():
-    rl.begin_drawing()
-    accumulator += rl.get_frame_time()
+    # Chip8 Init
+    c = Chip8()
 
-    while accumulator >= threshold:
-        c.tick()
-        accumulator -= threshold
+    # FIXME: Fix keypad.ch8 test not rendering choices prperly?
+    # I don't know why
+    c.load_rom(rom)
+    c.init_emu()
 
-    # if rl.is_key_pressed(rl.KeyboardKey.KEY_SPACE):
-    #     c.tick()
+    accumulator = 0
 
-    c.render()
-    rl.clear_background(bg_color)
-    rl.end_drawing()
+    while not rl.window_should_close():
+        rl.begin_drawing()
+        accumulator += rl.get_frame_time()
 
-c.close_emu()
-rl.close_window()
+        while accumulator >= THRESHOLD:
+            c.tick()
+            accumulator -= THRESHOLD
+
+        # if rl.is_key_pressed(rl.KeyboardKey.KEY_SPACE):
+        #     c.tick()
+
+        c.render()
+        rl.clear_background(BG_COLOR)
+        rl.end_drawing()
+
+    c.close_emu()
+    rl.close_window()
+
+
+if __name__ == "__main__":
+    main(get_rom())
