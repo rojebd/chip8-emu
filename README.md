@@ -3,8 +3,9 @@
 This repo includes the beep.wav file for the sound tone the chip8 plays
 and also some test roms to play/use with the Emulator.
 
-To use this emulator you need [raylib-python-cffi](https://github.com/electronstudio/raylib-python-cffi) installed
-installed dependencies with:
+To use this emulator you need [raylib-python-cffi](https://github.com/electronstudio/raylib-python-cffi) installed.
+
+Install dependencies with:
 
   ```console
     pip install -r requirements.txt
