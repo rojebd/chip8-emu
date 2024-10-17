@@ -498,6 +498,22 @@ class Chip8:
             case (0xF, op):
                 self.handle_0xF(op)
 
+    def reset(self) -> None:
+        # Before you reset the chip8 state
+        # make sure you do init_emu() at initialization and close_emu() at termination
+        self.memory: list[int] = [0] * 4096
+        self.registers: list[int] = [0] * 16
+        self.I: int = 0
+        self.delay_timer_register: int = 0
+        self.sound_timer_register: int = 0
+        self.PC: int = 0x200
+        self.SP: int = 0
+        self.stack: list[int] = [0] * 16
+        self.display: list[list[int]] = [[0] * 32 for _ in range(64)]
+        self.fonts: list[int] = font_codes
+        self.tone = None
+        self.is_already_playing = False
+
 
 def return_text_red(txt):
     return "\033[91m" + txt + "\033[0m"
