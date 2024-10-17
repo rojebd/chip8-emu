@@ -1,6 +1,14 @@
+<<<<<<< HEAD
 bin/
 include/
 lib/
 lib64
 __pycache__/
 pyenv.cfg
+=======
+./bin
+./include
+./lib
+./lib64
+./__pycache__
+>>>>>>> cd1dbdc (Updated gitignore)
