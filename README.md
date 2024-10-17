@@ -6,7 +6,10 @@ and also some test roms to play/use with the Emulator.
 To use this emulator you need [raylib-python-cffi](https://github.com/electronstudio/raylib-python-cffi) installed.
 
 Install dependencies with:
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 397c7f1 (Updated README.md)
 
   ```console
     pip install -r requirements.txt
