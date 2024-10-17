@@ -202,7 +202,7 @@ class Chip8:
         self.display = [[0] * 32 for _ in range(64)]
 
     def return_subroutine(self) -> None:
-        self.PC = self.stack[0xF]
+        self.PC = self.stack[self.SP]
         self.SP -= 1
 
     def jump_to(self, nnn: int) -> None:
@@ -525,7 +525,7 @@ SCALE = 15
 WIDTH = 64 * SCALE
 HEIGHT = 32 * SCALE
 TITLE = "Chip8 Emu"
-FPS = 60
+FPS = 400
 BG_COLOR = rl.BLACK
 PIXEL_COLOR = rl.GREEN
 THRESHOLD = 1 / FPS
