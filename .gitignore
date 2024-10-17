@@ -1,5 +1,5 @@
-bin/
-include/
-lib/
-lib64/
-__pycache__/
+./bin
+./include
+./lib
+./lib64
+./__pycache__
