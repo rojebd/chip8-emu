@@ -210,7 +210,7 @@ class Chip8:
 
     def call_subroutine(self, nnn: int) -> None:
         self.SP += 1
-        self.stack[0xF] = self.PC
+        self.stack[self.SP] = self.PC
         self.PC = nnn
 
     def skip_if_eq_kk(self, op: int) -> None:
@@ -525,7 +525,7 @@ SCALE = 15
 WIDTH = 64 * SCALE
 HEIGHT = 32 * SCALE
 TITLE = "Chip8 Emu"
-FPS = 400
+FPS = 60
 BG_COLOR = rl.BLACK
 PIXEL_COLOR = rl.GREEN
 THRESHOLD = 1 / FPS
