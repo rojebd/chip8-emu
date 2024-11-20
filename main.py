@@ -1,6 +1,8 @@
 import sys
 from random import randint
+
 import pyray as rl
+
 from fonts import fonts as font_codes
 
 
@@ -8,16 +10,16 @@ class Chip8:
     def __init__(self):
         self.memory: list[int] = [0] * 4096
         self.registers: list[int] = [0] * 16
-        self.I: int = 0
+        self.i: int = 0
         self.delay_timer_register: int = 0
         self.sound_timer_register: int = 0
-        self.PC: int = 0x200
-        self.SP: int = 0
+        self.pc: int = 0x200
+        self.sp: int = 0
         self.stack: list[int] = [0] * 16
         self.display: list[list[int]] = [[0] * 32 for _ in range(64)]
         self.fonts: list[int] = font_codes
-        self.tone = None
-        self.keyboard_map = {
+        self.tone: rl.Sound | None = None
+        self.keyboard_map: dict[int, int] = {
             rl.KeyboardKey.KEY_ONE: 0x1,
             rl.KeyboardKey.KEY_TWO: 0x2,
             rl.KeyboardKey.KEY_THREE: 0x3,
@@ -35,7 +37,7 @@ class Chip8:
             rl.KeyboardKey.KEY_C: 0xB,
             rl.KeyboardKey.KEY_V: 0xF,
         }
-        self.is_already_playing = False
+        self.is_already_playing: bool = False
 
     def init_emu(self) -> None:
         # fonts are put in memory
@@ -51,6 +53,9 @@ class Chip8:
 
     def beep(self) -> None:
         if not self.is_already_playing:
+            # self.tone SHOULD NOT be None
+            if self.tone is None:
+                return
             rl.play_sound(self.tone)
 
         return
@@ -62,6 +67,9 @@ class Chip8:
             self.sound_timer_register -= 1
         elif self.sound_timer_register <= 0:
             self.is_already_playing = True
+            # self.tone SHOULD NOT be None
+            if self.tone is None:
+                return
             rl.stop_sound(self.tone)
 
     def delay_timer(self) -> None:
@@ -88,7 +96,7 @@ class Chip8:
                 data = file.read()
                 n = 0
                 for byte in data:
-                    self.memory[self.PC + n] = byte
+                    self.memory[self.pc + n] = byte
                     n += 1
         except FileNotFoundError:
             raise FileNotFoundError(
@@ -204,34 +212,38 @@ class Chip8:
             case 0xE:
                 self.vx_shl_1(op)
 
+            case _:
+                print("Unreachable")
+                exit(1)
+
     def clear_display(self) -> None:
         self.display = [[0] * 32 for _ in range(64)]
 
     def return_subroutine(self) -> None:
-        self.PC = self.stack[self.SP]
-        self.SP -= 1
+        self.pc = self.stack[self.sp]
+        self.sp -= 1
 
     def jump_to(self, nnn: int) -> None:
-        self.PC = nnn
+        self.pc = nnn
 
     def call_subroutine(self, nnn: int) -> None:
-        self.SP += 1
-        self.stack[self.SP] = self.PC
-        self.PC = nnn
+        self.sp += 1
+        self.stack[self.sp] = self.pc
+        self.pc = nnn
 
     def skip_if_eq_kk(self, op: int) -> None:
         x = op >> 8
         kk = op & 0xFF
         Vx = self.registers[x]
         if Vx == kk:
-            self.PC += 2
+            self.pc += 2
 
     def skip_if_not_eq_kk(self, op: int) -> None:
         x = op >> 8
         kk = op & 0xFF
         Vx = self.registers[x]
         if Vx != kk:
-            self.PC += 2
+            self.pc += 2
 
     def skip_if_eq_vx(self, op: int) -> None:
         x = op >> 8
@@ -239,7 +251,7 @@ class Chip8:
         Vx = self.registers[x]
         Vy = self.registers[y]
         if Vx == Vy:
-            self.PC += 2
+            self.pc += 2
 
     def ld_vx_to_kk(self, op: int) -> None:
         x = op >> 8
@@ -257,13 +269,13 @@ class Chip8:
         Vx = self.registers[x]
         Vy = self.registers[y]
         if Vx != Vy:
-            self.PC += 2
+            self.pc += 2
 
     def set_i_to_nnn(self, nnn: int) -> None:
-        self.I = nnn
+        self.i = nnn
 
     def jump_to_nnn_plus_v0(self, nnn: int) -> None:
-        self.PC = nnn + self.registers[0x0]
+        self.pc = nnn + self.registers[0x0]
 
     def set_vx_to_randbyte_and_kk(self, op: int) -> None:
         x = op >> 8
@@ -271,12 +283,12 @@ class Chip8:
         randbyte = randint(0, 255)
         self.registers[x] = randbyte & kk
 
-    def read_n_bytes(self, n) -> list[int]:
+    def read_n_bytes(self, n: int) -> list[int]:
         sprites: list[int] = []
         for i in range(n):
-            if self.I + n > len(self.memory):
+            if self.i + n > len(self.memory):
                 raise ValueError("Attempted to read beyond memory limits")
-            sprites.append(self.memory[self.I + i])
+            sprites.append(self.memory[self.i + i])
 
         return sprites
 
@@ -320,51 +332,51 @@ class Chip8:
         Vx = self.registers[x]
         key = self.convert_to_keyboard(Vx)
         if rl.is_key_down(key):
-            self.PC += 2
+            self.pc += 2
 
     def skip_if_key_vx_not_pressed(self, op: int) -> None:
         x = op >> 8
         Vx = self.registers[x]
         key = self.convert_to_keyboard(Vx)
         if rl.is_key_up(key):
-            self.PC += 2
+            self.pc += 2
 
     def convert_to_keyboard(self, key: int) -> int:
         match key:
             case 0x1:
-                return rl.KeyboardKey.KEY_ONE.value
+                return rl.KeyboardKey.KEY_ONE
             case 0x2:
-                return rl.KeyboardKey.KEY_TWO.value
+                return rl.KeyboardKey.KEY_TWO
             case 0x3:
-                return rl.KeyboardKey.KEY_THREE.value
+                return rl.KeyboardKey.KEY_THREE
             case 0xC:
-                return rl.KeyboardKey.KEY_FOUR.value
+                return rl.KeyboardKey.KEY_FOUR
             case 0x4:
-                return rl.KeyboardKey.KEY_Q.value
+                return rl.KeyboardKey.KEY_Q
             case 0x5:
-                return rl.KeyboardKey.KEY_W.value
+                return rl.KeyboardKey.KEY_W
             case 0x6:
-                return rl.KeyboardKey.KEY_E.value
+                return rl.KeyboardKey.KEY_E
             case 0xD:
-                return rl.KeyboardKey.KEY_R.value
+                return rl.KeyboardKey.KEY_R
             case 0x7:
-                return rl.KeyboardKey.KEY_A.value
+                return rl.KeyboardKey.KEY_A
             case 0x8:
-                return rl.KeyboardKey.KEY_S.value
+                return rl.KeyboardKey.KEY_S
             case 0x9:
-                return rl.KeyboardKey.KEY_D.value
+                return rl.KeyboardKey.KEY_D
             case 0xE:
-                return rl.KeyboardKey.KEY_F.value
+                return rl.KeyboardKey.KEY_F
             case 0xA:
-                return rl.KeyboardKey.KEY_Z.value
+                return rl.KeyboardKey.KEY_Z
             case 0x0:
-                return rl.KeyboardKey.KEY_X.value
+                return rl.KeyboardKey.KEY_X
             case 0xB:
-                return rl.KeyboardKey.KEY_C.value
+                return rl.KeyboardKey.KEY_C
             case 0xF:
-                return rl.KeyboardKey.KEY_V.value
+                return rl.KeyboardKey.KEY_V
             case _:
-                return rl.KeyboardKey.KEY_NULL.value
+                return rl.KeyboardKey.KEY_NULL
 
     def handle_0xE(self, op: int) -> None:
         last_op = op & 0xF
@@ -373,6 +385,10 @@ class Chip8:
                 self.skip_if_key_vx_pressed(op)
             case 0x1:
                 self.skip_if_key_vx_not_pressed(op)
+
+            case _:
+                print("Unreachable")
+                exit(1)
 
     def vx_eq_dt(self, op: int) -> None:
         x = op >> 8
@@ -401,29 +417,29 @@ class Chip8:
 
     def i_eq_i_plus_vx(self, op: int) -> None:
         x = op >> 8
-        self.I = self.I + self.registers[x]
+        self.i = self.i + self.registers[x]
 
     def i_eq_location_sprite_vx(self, op: int) -> None:
         x = op >> 8
         Vx = self.registers[x]
-        self.I = Vx * 5
+        self.i = Vx * 5
 
     def bcd_repr_vx(self, op: int) -> None:
         x = op >> 8
         Vx = self.registers[x]
-        self.memory[self.I] = Vx // 100
-        self.memory[self.I + 1] = (Vx // 10) % 10
-        self.memory[self.I + 2] = Vx % 10
+        self.memory[self.i] = Vx // 100
+        self.memory[self.i + 1] = (Vx // 10) % 10
+        self.memory[self.i + 2] = Vx % 10
 
     def copy_v0_to_vx(self, op: int) -> None:
         x = op >> 8
         for i in range(x):
-            self.memory[self.I + i] = self.registers[i]
+            self.memory[self.i + i] = self.registers[i]
 
     def read_v0_to_vx(self, op: int) -> None:
         x = op >> 8
         for i in range(x):
-            self.registers[i] = self.memory[self.I + i]
+            self.registers[i] = self.memory[self.i + i]
 
     def handle_0xF(self, op: int) -> None:
         last_op = op & 0xFF
@@ -447,13 +463,17 @@ class Chip8:
             case 0x65:
                 self.read_v0_to_vx(op)
 
+            case _:
+                print("Unreachable")
+                exit(1)
+
     def exec_instruction(self) -> None:
-        instruction: int = (self.memory[self.PC] << 8) | (
-            self.memory[self.PC + 1]
+        instruction: int = (self.memory[self.pc] << 8) | (
+            self.memory[self.pc + 1]
         )
         opcode: int = instruction >> 12
         operands: int = instruction & 0xFFF
-        self.PC += 2
+        self.pc += 2
         print(
             f"INSTRUCTION: {hex(instruction)}, OPCODE: {hex(opcode)}, OPERANDS: {hex(operands)}"
         )
@@ -507,24 +527,28 @@ class Chip8:
             case (0xF, op):
                 self.handle_0xF(op)
 
+            case _:
+                print("Unreachable")
+                exit(1)
+
     def reset(self) -> None:
         # Before you reset the chip8 state
         # make sure you do init_emu() at initialization and close_emu() at termination
-        self.memory: list[int] = [0] * 4096
-        self.registers: list[int] = [0] * 16
-        self.I: int = 0
-        self.delay_timer_register: int = 0
-        self.sound_timer_register: int = 0
-        self.PC: int = 0x200
-        self.SP: int = 0
-        self.stack: list[int] = [0] * 16
-        self.display: list[list[int]] = [[0] * 32 for _ in range(64)]
-        self.fonts: list[int] = font_codes
+        self.memory = [0] * 4096
+        self.registers = [0] * 16
+        self.i = 0
+        self.delay_timer_register = 0
+        self.sound_timer_register = 0
+        self.pc = 0x200
+        self.sp = 0
+        self.stack = [0] * 16
+        self.display = [[0] * 32 for _ in range(64)]
+        self.fonts = font_codes
         self.tone = None
         self.is_already_playing = False
 
 
-def return_text_red(txt):
+def return_text_red(txt: str) -> str:
     return "\033[91m" + txt + "\033[0m"
 
 
@@ -539,7 +563,7 @@ PIXEL_COLOR = rl.GREEN
 THRESHOLD = 1 / FPS
 
 
-def get_rom():
+def get_rom() -> str:
     rom: str = sys.argv[1]
     if rom.strip() == "":
         print(return_text_red("No file was given"))
@@ -547,7 +571,7 @@ def get_rom():
     return rom
 
 
-def main(rom):
+def main(rom: str):
     # Init
     rl.init_window(WIDTH, HEIGHT, TITLE)
     rl.set_window_position(20, 60)
