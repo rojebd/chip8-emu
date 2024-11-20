@@ -18,22 +18,22 @@ class Chip8:
         self.fonts: list[int] = font_codes
         self.tone = None
         self.keyboard_map = {
-            rl.KeyboardKey.KEY_ONE.value: 0x1,
-            rl.KeyboardKey.KEY_TWO.value: 0x2,
-            rl.KeyboardKey.KEY_THREE.value: 0x3,
-            rl.KeyboardKey.KEY_FOUR.value: 0xC,
-            rl.KeyboardKey.KEY_Q.value: 0x4,
-            rl.KeyboardKey.KEY_W.value: 0x5,
-            rl.KeyboardKey.KEY_E.value: 0x6,
-            rl.KeyboardKey.KEY_R.value: 0xD,
-            rl.KeyboardKey.KEY_A.value: 0x7,
-            rl.KeyboardKey.KEY_S.value: 0x8,
-            rl.KeyboardKey.KEY_D.value: 0x9,
-            rl.KeyboardKey.KEY_F.value: 0xE,
-            rl.KeyboardKey.KEY_Z.value: 0xA,
-            rl.KeyboardKey.KEY_X.value: 0x0,
-            rl.KeyboardKey.KEY_C.value: 0xB,
-            rl.KeyboardKey.KEY_V.value: 0xF,
+            rl.KeyboardKey.KEY_ONE: 0x1,
+            rl.KeyboardKey.KEY_TWO: 0x2,
+            rl.KeyboardKey.KEY_THREE: 0x3,
+            rl.KeyboardKey.KEY_FOUR: 0xC,
+            rl.KeyboardKey.KEY_Q: 0x4,
+            rl.KeyboardKey.KEY_W: 0x5,
+            rl.KeyboardKey.KEY_E: 0x6,
+            rl.KeyboardKey.KEY_R: 0xD,
+            rl.KeyboardKey.KEY_A: 0x7,
+            rl.KeyboardKey.KEY_S: 0x8,
+            rl.KeyboardKey.KEY_D: 0x9,
+            rl.KeyboardKey.KEY_F: 0xE,
+            rl.KeyboardKey.KEY_Z: 0xA,
+            rl.KeyboardKey.KEY_X: 0x0,
+            rl.KeyboardKey.KEY_C: 0xB,
+            rl.KeyboardKey.KEY_V: 0xF,
         }
         self.is_already_playing = False
 
