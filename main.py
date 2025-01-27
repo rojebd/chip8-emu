@@ -80,16 +80,12 @@ class Chip8:
         for y in range(32):
             for x in range(64):
                 if self.display[x][y] == 1:
-                    rl.draw_rectangle(
-                        x * SCALE, y * SCALE, SCALE, SCALE, PIXEL_COLOR
-                    )
+                    rl.draw_rectangle(x * SCALE, y * SCALE, SCALE, SCALE, PIXEL_COLOR)
                 else:
                     pass
 
     def load_rom(self, filename: str):
-        assert filename.endswith(".ch8"), return_text_red(
-            "File does not end with .ch8"
-        )
+        assert filename.endswith(".ch8"), return_text_red("File does not end with .ch8")
 
         try:
             with open(filename, "rb") as file:
@@ -99,9 +95,7 @@ class Chip8:
                     self.memory[self.pc + n] = byte
                     n += 1
         except FileNotFoundError:
-            raise FileNotFoundError(
-                return_text_red(f"File: {filename} does not exist")
-            )
+            raise FileNotFoundError(return_text_red(f"File: {filename} does not exist"))
 
         except Exception as e:
             print(return_text_red(f"Exception: {e}"))
@@ -468,9 +462,7 @@ class Chip8:
                 exit(1)
 
     def exec_instruction(self) -> None:
-        instruction: int = (self.memory[self.pc] << 8) | (
-            self.memory[self.pc + 1]
-        )
+        instruction: int = (self.memory[self.pc] << 8) | (self.memory[self.pc + 1])
         opcode: int = instruction >> 12
         operands: int = instruction & 0xFFF
         self.pc += 2
