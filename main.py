@@ -4,7 +4,7 @@ import pyray as rl
 from fonts import fonts as font_codes
 
 
-class Cbhip8:
+class Chip8:
     def __init__(self):
         self.memory: list[int] = [0] * 4096
         self.registers: list[int] = [0] * 16
