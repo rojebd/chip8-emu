@@ -18,5 +18,9 @@ Now you can run ROMS with:
 ## Resources used by this
 - http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#Fx75
 
+## Example of the Emulator rendering a test ROM
+
+[![Emulator rendering a test ROM](./Chip8_Example_Working.webp)]
+
 ## LICENSE
 MIT License
