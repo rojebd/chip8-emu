@@ -20,7 +20,7 @@ Now you can run ROMS with:
 
 ## Example of the Emulator rendering a test ROM
 
-[![Emulator rendering a test ROM](./Chip8_Example_Working.webp)]
+[Emulator rendering a test ROM](./Chip8_Example_Working.webp)
 
 ## LICENSE
 MIT License
